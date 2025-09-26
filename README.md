@@ -1,13 +1,18 @@
 # AI Agent CLI
 
-A simple command-line interface for interacting with Google's Gemini AI model.
+An intelligent coding agent powered by Google's Gemini AI model with function calling capabilities.
 
 ## Features
 
-- Send prompts directly from the command line
-- Get AI-generated responses using Gemini 2.0 Flash
-- Optional verbose mode to display token usage statistics
-- Environment-based API key configuration
+- **AI Coding Agent**: Intelligent assistant that can understand and execute coding tasks
+- **Function Calling**: The agent can perform file operations through integrated functions:
+  - List files and directories
+  - Read file contents
+  - Write or overwrite files
+  - Execute Python files with optional arguments
+- **Iterative Problem Solving**: Runs up to 20 iterations to complete complex tasks
+- **Verbose Mode**: Display detailed function calls and token usage statistics
+- **Environment-based Configuration**: Secure API key management through .env files
 
 ## Prerequisites
 
@@ -41,31 +46,36 @@ A simple command-line interface for interacting with Google's Gemini AI model.
 
 ## Usage
 
-### Basic Usage
+### Basic Coding Tasks
+Ask the agent to perform coding tasks - it will automatically use the available functions:
 ```bash
-python main.py "What is the capital of France?"
+python main.py "Create a simple calculator in Python"
+python main.py "Show me the contents of main.py"
+python main.py "List all Python files in the current directory"
 ```
 
 ### Verbose Mode
-Display token usage statistics along with the response:
+Display detailed function calls and token usage statistics:
 ```bash
-python main.py "Explain quantum computing" --verbose
+python main.py "Fix any bugs in calculator.py" --verbose
 ```
 
 ## Example
 
 ```bash
-$ python main.py "Write a haiku about coding"
-Code flows like water,
-Logic branching through the night,
-Bugs become features.
+$ python main.py "Create a hello world program"
+Calling function: write_file
+-> File written successfully
+I've created a simple "Hello, World!" program in hello_world.py
 
-$ python main.py "What is machine learning?" --verbose
-Machine learning is a subset of artificial intelligence that focuses on...
+$ python main.py "Run the hello world program" --verbose
+User prompt: Run the hello world program
+Calling function: run_python_file({'file_path': 'hello_world.py'})
+-> Hello, World!
 
-User prompt: What is machine learning?
-Prompt tokens: 6
-Response tokens: 142
+I've successfully run the hello_world.py program. The output was "Hello, World!"
+Prompt tokens: 12
+Response tokens: 45
 ```
 
 ## Configuration
@@ -77,6 +87,17 @@ Set your API key in the `.env` file:
 GEMINI_API_KEY=your_actual_api_key_here
 ```
 
+## Architecture
+
+The agent operates within a working directory (`./calculator`) and can perform the following operations:
+
+- **get_files_info**: List files and directories
+- **get_file_content**: Read the contents of any file
+- **write_file**: Create or overwrite files
+- **run_python_file**: Execute Python scripts with optional arguments
+
+The agent uses an iterative approach, making up to 20 function calls to complete complex tasks.
+
 ## Dependencies
 
 - `google-genai`: Official Google Generative AI Python client
@@ -86,4 +107,6 @@ GEMINI_API_KEY=your_actual_api_key_here
 
 - If no prompt is provided, the application will display an error message
 - If the API key is missing or invalid, the Google client will raise an authentication error
+- Function call errors are handled gracefully and reported back to the agent
+- The agent will attempt to complete tasks within the maximum iteration limit (20 loops)
 - Network issues will be propagated as exceptions from the underlying HTTP client
