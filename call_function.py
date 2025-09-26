@@ -23,7 +23,7 @@ def call_function(function_call_part: types.FunctionCall, verbose=False):
     if verbose:
         print(f"Calling function: {function_call_part.name}({function_call_part.args})")
     else:
-        print(f" - Calling function: {function_call_part.name}")
+        print(f"Calling function: {function_call_part.name}")
 
     if function_call_part.name not in function_dict:
         return types.Content(

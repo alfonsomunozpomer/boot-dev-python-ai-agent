@@ -62,13 +62,14 @@ def main():
 
         if not (
             function_call_result.parts and 
-            function_call_result.parts[0].function_response and
-            function_call_result.parts[0].function_response.response
+            function_call_result.parts[0].function_response
         ):
             raise Exception("Function did not return a response")
 
         if args.verbose:
             print(f"-> {function_call_result.parts[0].function_response.response}")
+        else:
+            print(function_call_result.parts[0].function_response.response['result'])
 
     if args.verbose:
         print(f'Prompt tokens: {response.usage_metadata.prompt_token_count}')
