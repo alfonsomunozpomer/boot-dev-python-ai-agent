@@ -1,5 +1,7 @@
 import sys
 import os
+from textwrap import dedent
+from google.genai import types
 from config import MAX_CHARS
 
 def get_file_content(working_directory, file_path):
@@ -24,3 +26,21 @@ def get_file_content(working_directory, file_path):
         return f'Error: {str(e)}'
 
     pass
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description=dedent(f"""\
+                    Shows the content of the specified file, constrained to the working directory. 
+                    Truncates content to a maximum number of characters defined by the constant 
+                    MAX_CHARS; currently  set to {MAX_CHARS}."""),
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path to the file to read, relative to the working directory."
+            ),
+        },
+    ),
+)
