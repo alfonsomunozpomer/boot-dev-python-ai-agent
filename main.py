@@ -1,10 +1,12 @@
 import argparse
 import os
+import re
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from textwrap import dedent
 from call_function import available_functions, call_function
+from config import MAX_AGENT_LOOP_COUNT
 
 def main():
     parser = argparse.ArgumentParser(description="AI Coding Agent")
@@ -15,6 +17,7 @@ def main():
     if not args.prompt:
         print("Error: Please provide a prompt as a command line argument.")
         exit(1)
+    verbose = args.verbose
 
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -38,27 +41,52 @@ def main():
     )
     user_prompt = args.prompt
 
-    if args.verbose:
+    if verbose:
         print(f'User prompt: {user_prompt}')
 
     messages = [
         types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
 
-    response = client.models.generate_content(
-        model='gemini-2.0-flash-001',
-        contents=messages,
-        config=types.GenerateContentConfig(
-            tools=[available_functions],
-            system_instruction=system_prompt
-        ),
-    )
+    for _ in range(MAX_AGENT_LOOP_COUNT):
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-001',
+                contents=messages,
+                config=types.GenerateContentConfig(
+                    tools=[available_functions],
+                    system_instruction=system_prompt
+                ),
+            )
 
-    if not response.function_calls:
-        return response.text
+            messages.extend(map(lambda candidate: candidate.content, response.candidates))
 
-    for function_call_part in response.function_calls:
-        function_call_result = call_function(function_call_part, verbose=args.verbose)
+            if not response.function_calls:
+                print(response.text)
+                if verbose:
+                    print_token_usage(response)
+                exit(0)
+
+            user_messages = handle_function_calls(response.function_calls, verbose)
+            messages.extend(user_messages)
+
+            if verbose:
+                print_token_usage(response)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+
+
+def map_function_calls_to_user_messages(response_function_calls):
+    return []
+
+
+def handle_function_calls(response_function_calls, verbose):
+    user_messages = []
+
+    for function_call_part in response_function_calls:
+        function_call_result = call_function(function_call_part, verbose=verbose)
 
         if not (
             function_call_result.parts and 
@@ -66,14 +94,22 @@ def main():
         ):
             raise Exception("Function did not return a response")
 
-        if args.verbose:
+        if verbose:
             print(f"-> {function_call_result.parts[0].function_response.response}")
-        else:
-            print(function_call_result.parts[0].function_response.response['result'])
 
-    if args.verbose:
-        print(f'Prompt tokens: {response.usage_metadata.prompt_token_count}')
-        print(f'Response tokens: {response.usage_metadata.candidates_token_count}')
+        user_messages.append(
+            types.Content(
+                role="user",
+                parts=[function_call_result.parts[0]]
+            )
+        )
+
+    return user_messages
+
+
+def print_token_usage(response):
+    print(f'Prompt tokens: {response.usage_metadata.prompt_token_count}')
+    print(f'Response tokens: {response.usage_metadata.candidates_token_count}')
 
 
 if __name__ == "__main__":
