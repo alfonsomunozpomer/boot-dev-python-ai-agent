@@ -4,6 +4,9 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from functions.get_files_info import schema_get_files_info
+from functions.get_file_content import schema_get_file_content
+from functions.write_file import schema_write_file
+from functions.run_python_file import schema_run_python_file
 from textwrap import dedent
 
 
@@ -26,6 +29,9 @@ def main():
         You can perform the following operations:
 
         - List files and directories
+        - Read file contents
+        - Execute Python files with optional arguments
+        - Write or overwrite files
 
         All paths you provide should be relative to the working directory.
         You do not need to specify the working directory in your function calls
@@ -35,7 +41,9 @@ def main():
     available_functions = types.Tool(
         function_declarations=[
             schema_get_files_info,
-        ]
+            schema_get_file_content,
+            schema_write_file,
+            schema_run_python_file,]
     )
 
     user_prompt = sys.argv[1]
