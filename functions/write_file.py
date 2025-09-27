@@ -1,8 +1,8 @@
 import os
 from textwrap import dedent
-from google.genai import types
+from google.genai.types import FunctionDeclaration, Schema, Type
 
-def write_file(working_directory, file_path, content):
+def write_file(working_directory : str, file_path, content : str) -> str:
     destination_file_path = os.path.join(working_directory, file_path)
 
     working_directory_absolute_path = os.path.abspath(working_directory)
@@ -22,20 +22,20 @@ def write_file(working_directory, file_path, content):
         return f'Error: {str(e)}'
     
     
-schema_write_file = types.FunctionDeclaration(
+schema_write_file = FunctionDeclaration(
     name="write_file",
     description=dedent("""\
                     Writes the specified content to a file, constrained to the working directory. 
                     Creates any necessary directories along the path."""),
-    parameters=types.Schema(
-        type=types.Type.OBJECT,
+    parameters=Schema(
+        type=Type.OBJECT,
         properties={
-            "file_path": types.Schema(
-                type=types.Type.STRING,
+            "file_path": Schema(
+                type=Type.STRING,
                 description="The path to the file to write, relative to the working directory."
             ),
-            "content": types.Schema(
-                type=types.Type.STRING,
+            "content": Schema(
+                type=Type.STRING,
                 description="The content to write to the file."
             ),
         },

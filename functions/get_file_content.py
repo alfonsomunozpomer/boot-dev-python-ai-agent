@@ -1,10 +1,9 @@
-import sys
 import os
 from textwrap import dedent
-from google.genai import types
+from google.genai.types import FunctionDeclaration, Schema, Type
 from config import MAX_CHARS
 
-def get_file_content(working_directory, file_path):
+def get_file_content(working_directory: str, file_path: str) -> str:
     destination_file_path = os.path.join(working_directory, file_path)
 
     working_directory_absolute_path = os.path.abspath(working_directory)
@@ -25,20 +24,18 @@ def get_file_content(working_directory, file_path):
     except Exception as e:
         return f'Error: {str(e)}'
 
-    pass
 
-
-schema_get_file_content = types.FunctionDeclaration(
+schema_get_file_content = FunctionDeclaration(
     name="get_file_content",
     description=dedent(f"""\
                     Shows the content of the specified file, constrained to the working directory. 
                     Truncates content to a maximum number of characters defined by the constant 
                     MAX_CHARS; currently  set to {MAX_CHARS}."""),
-    parameters=types.Schema(
-        type=types.Type.OBJECT,
+    parameters=Schema(
+        type=Type.OBJECT,
         properties={
-            "file_path": types.Schema(
-                type=types.Type.STRING,
+            "file_path": Schema(
+                type=Type.STRING,
                 description="The path to the file to read, relative to the working directory."
             ),
         },

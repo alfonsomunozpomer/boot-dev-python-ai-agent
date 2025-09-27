@@ -1,8 +1,8 @@
 import os
-import sys
-from google.genai import types
+from textwrap import dedent
+from google.genai.types import FunctionDeclaration, Schema, Type
 
-def get_files_info(working_directory, directory="."):
+def get_files_info(working_directory : str, directory : str = ".") -> str:
     absolute_path = os.path.abspath(os.path.join(working_directory, directory))
 
     if (
@@ -24,27 +24,24 @@ def get_files_info(working_directory, directory="."):
     except Exception as e:
         return f'Error: {str(e)}'
         
-def _format_path_info(file_path):
-    return f'- {os.path.basename(file_path)}: file_size={os.path.getsize(file_path)} bytes, is_dir={os.path.isdir(file_path)}'
+def _format_path_info(file_path : str) -> str:
+    return dedent(f"""\
+                - {os.path.basename(file_path)}: 
+                file_size={os.path.getsize(file_path)} bytes,
+                is_dir={os.path.isdir(file_path)}""")
 
 
-schema_get_files_info = types.FunctionDeclaration(
+schema_get_files_info = FunctionDeclaration(
     name="get_files_info",
     description="Lists files in the specified directory along with their sizes, constrained to the working directory.",
-    parameters=types.Schema(
-        type=types.Type.OBJECT,
+    parameters=Schema(
+        type=Type.OBJECT,
         properties={
-            "directory": types.Schema(
-                type=types.Type.STRING,
+            "directory": Schema(
+                type=Type.STRING,
                 default=".",
                 description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself.",
             ),
         },
     ),
 )
-
-
-if __name__ == "__main__":
-    # get_files_info('/home/alf/devsorted/boot.dev/ai-agent', '../..')
-    # print(get_files_info('calculator', '../..'))
-    print(get_files_info(sys.argv[1], sys.argv[2]))

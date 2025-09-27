@@ -96,14 +96,14 @@ def handle_function_calls(response_function_calls: list[FunctionCall], verbose: 
         user_messages.append(
             Content(
                 role="user",
-                parts=[function_call_result.parts[0]]
+                parts=function_call_result.parts
             )
         )
 
     return user_messages
 
 
-def print_token_usage(response):
+def print_token_usage(response) -> None:
     print(f'Prompt tokens: {response.usage_metadata.prompt_token_count}')
     print(f'Response tokens: {response.usage_metadata.candidates_token_count}')
 

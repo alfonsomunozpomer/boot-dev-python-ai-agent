@@ -1,16 +1,16 @@
 import os
 import subprocess
 from textwrap import dedent
-from google.genai import types
+from google.genai.types import FunctionDeclaration, Schema, Type
 
-def run_python_file(working_directory, file_path, args=[]):
+def run_python_file(working_directory : str, file_path, args : str =[]) -> str:
     destination_file_path = os.path.join(working_directory, file_path)
 
     working_directory_absolute_path = os.path.abspath(working_directory)
     destination_file_absolute_path = os.path.abspath(destination_file_path)
     if (
         not os.path.commonpath([working_directory_absolute_path, destination_file_absolute_path]) ==
-          working_directory_absolute_path
+        working_directory_absolute_path
     ):
         return f'Error: Cannot execute "{file_path}" as it is outside the permitted working directory'
 
@@ -42,22 +42,22 @@ def run_python_file(working_directory, file_path, args=[]):
         return f'Error: {str(e)}'
 
 
-schema_run_python_file = types.FunctionDeclaration(
+schema_run_python_file = FunctionDeclaration(
     name="run_python_file",
     description=dedent("""\
                     Executes the specified Python file with optional arguments, constrained to the working directory. 
                     Captures and returns the standard output and error produced during execution."""),
-    parameters=types.Schema(
-        type=types.Type.OBJECT,
+    parameters=Schema(
+        type=Type.OBJECT,
         properties={
-            "file_path": types.Schema(
-                type=types.Type.STRING,
+            "file_path": Schema(
+                type=Type.STRING,
                 description="The path to the Python file to execute, relative to the working directory."
             ),
-            "args": types.Schema(
-                type=types.Type.ARRAY,
-                items=types.Schema(
-                    type=types.Type.STRING,
+            "args": Schema(
+                type=Type.ARRAY,
+                items=Schema(
+                    type=Type.STRING,
                 ),
                 description="Optional arguments to pass to the Python file.",
             ),
