@@ -1,6 +1,5 @@
 import argparse
 import os
-import re
 from dotenv import load_dotenv
 from google.genai import Client
 from google.genai.types import GenerateContentConfig, Content, FunctionCall, Part
