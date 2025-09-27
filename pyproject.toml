@@ -1,7 +1,7 @@
 [project]
 name = "ai-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "An intelligent AI coding agent powered by Google Gemini with function calling capabilities. Can read/write files, execute Python scripts, and solve coding tasks iteratively. Built with Python 3.13 and uv package management."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
