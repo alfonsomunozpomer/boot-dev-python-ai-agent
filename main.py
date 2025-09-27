@@ -2,13 +2,13 @@ import argparse
 import os
 import re
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from google.genai import Client
+from google.genai.types import GenerateContentConfig, Content, FunctionCall, Part
 from textwrap import dedent
 from call_function import available_functions, call_function
 from config import MAX_AGENT_LOOP_COUNT
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="AI Coding Agent")
     parser.add_argument("prompt", type=str, help="The prompt for the AI agent")
     parser.add_argument("--verbose", action="store_true")
@@ -21,7 +21,7 @@ def main():
 
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
-    client = genai.Client(api_key=api_key)
+    client = Client(api_key=api_key)
 
     system_prompt = dedent(
         """\
@@ -45,7 +45,7 @@ def main():
         print(f'User prompt: {user_prompt}')
 
     messages = [
-        types.Content(role="user", parts=[types.Part(text=user_prompt)]),
+        Content(role="user", parts=[Part(text=user_prompt)]),
     ]
 
     for _ in range(MAX_AGENT_LOOP_COUNT):
@@ -53,7 +53,7 @@ def main():
             response = client.models.generate_content(
                 model='gemini-2.0-flash-001',
                 contents=messages,
-                config=types.GenerateContentConfig(
+                config=GenerateContentConfig(
                     tools=[available_functions],
                     system_instruction=system_prompt
                 ),
@@ -78,11 +78,7 @@ def main():
             break
 
 
-def map_function_calls_to_user_messages(response_function_calls):
-    return []
-
-
-def handle_function_calls(response_function_calls, verbose):
+def handle_function_calls(response_function_calls: list[FunctionCall], verbose: bool) -> list[Content]:
     user_messages = []
 
     for function_call_part in response_function_calls:
@@ -98,7 +94,7 @@ def handle_function_calls(response_function_calls, verbose):
             print(f"-> {function_call_result.parts[0].function_response.response}")
 
         user_messages.append(
-            types.Content(
+            Content(
                 role="user",
                 parts=[function_call_result.parts[0]]
             )
