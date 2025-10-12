@@ -7,6 +7,7 @@ from textwrap import dedent
 from call_function import available_functions, call_function
 from config import MAX_AGENT_LOOP_COUNT
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="AI Coding Agent")
     parser.add_argument("prompt", type=str, help="The prompt for the AI agent")
@@ -41,7 +42,7 @@ def main() -> None:
     user_prompt = args.prompt
 
     if verbose:
-        print(f'User prompt: {user_prompt}')
+        print(f"User prompt: {user_prompt}")
 
     messages = [
         Content(role="user", parts=[Part(text=user_prompt)]),
@@ -50,15 +51,16 @@ def main() -> None:
     for _ in range(MAX_AGENT_LOOP_COUNT):
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash-001',
+                model="gemini-2.0-flash-001",
                 contents=messages,
                 config=GenerateContentConfig(
-                    tools=[available_functions],
-                    system_instruction=system_prompt
+                    tools=[available_functions], system_instruction=system_prompt
                 ),
             )
 
-            messages.extend(map(lambda candidate: candidate.content, response.candidates))
+            messages.extend(
+                map(lambda candidate: candidate.content, response.candidates)
+            )
 
             if not response.function_calls:
                 print(response.text)
@@ -77,34 +79,31 @@ def main() -> None:
             break
 
 
-def handle_function_calls(response_function_calls: list[FunctionCall], verbose: bool) -> list[Content]:
+def handle_function_calls(
+    response_function_calls: list[FunctionCall], verbose: bool
+) -> list[Content]:
     user_messages = []
 
     for function_call_part in response_function_calls:
         function_call_result = call_function(function_call_part, verbose=verbose)
 
         if not (
-            function_call_result.parts and 
-            function_call_result.parts[0].function_response
+            function_call_result.parts
+            and function_call_result.parts[0].function_response
         ):
             raise Exception("Function did not return a response")
 
         if verbose:
             print(f"-> {function_call_result.parts[0].function_response.response}")
 
-        user_messages.append(
-            Content(
-                role="user",
-                parts=function_call_result.parts
-            )
-        )
+        user_messages.append(Content(role="user", parts=function_call_result.parts))
 
     return user_messages
 
 
 def print_token_usage(response) -> None:
-    print(f'Prompt tokens: {response.usage_metadata.prompt_token_count}')
-    print(f'Response tokens: {response.usage_metadata.candidates_token_count}')
+    print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+    print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
 
 if __name__ == "__main__":

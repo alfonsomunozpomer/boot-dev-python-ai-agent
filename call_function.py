@@ -5,12 +5,13 @@ from functions.write_file import write_file, schema_write_file
 from functions.run_python_file import run_python_file, schema_run_python_file
 
 available_functions = Tool(
-        function_declarations=[
-            schema_get_files_info,
-            schema_get_file_content,
-            schema_write_file,
-            schema_run_python_file,]
-    )
+    function_declarations=[
+        schema_get_files_info,
+        schema_get_file_content,
+        schema_write_file,
+        schema_run_python_file,
+    ]
+)
 
 function_dict = {
     "get_files_info": get_files_info,
@@ -18,6 +19,7 @@ function_dict = {
     "write_file": write_file,
     "run_python_file": run_python_file,
 }
+
 
 def call_function(function_call_part: FunctionCall, verbose: bool = False) -> Content:
     if verbose:
@@ -35,10 +37,12 @@ def call_function(function_call_part: FunctionCall, verbose: bool = False) -> Co
                 )
             ],
         )
-    
+
     working_directory = "./calculator"
     function_name = function_call_part.name
-    function_result = function_dict[function_call_part.name](**function_call_part.args, working_directory=working_directory)
+    function_result = function_dict[function_call_part.name](
+        **function_call_part.args, working_directory=working_directory
+    )
 
     return Content(
         role="tool",

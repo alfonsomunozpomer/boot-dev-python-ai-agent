@@ -2,29 +2,32 @@ import os
 from textwrap import dedent
 from google.genai.types import FunctionDeclaration, Schema, Type
 
-def get_files_info(working_directory : str, directory : str = ".") -> str:
+
+def get_files_info(working_directory: str, directory: str = ".") -> str:
     absolute_path = os.path.abspath(os.path.join(working_directory, directory))
 
-    if (
-        os.path.commonpath([os.path.abspath(working_directory), absolute_path]) !=
-        os.path.abspath(working_directory)
-    ):
+    if os.path.commonpath(
+        [os.path.abspath(working_directory), absolute_path]
+    ) != os.path.abspath(working_directory):
         return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
 
     if not os.path.isdir(absolute_path):
         return f'Error: "{directory}" is not a directory'
-    
-    try:        
-        return '\n'.join(
+
+    try:
+        return "\n".join(
             map(
-                lambda dir_entry: _format_path_info(os.path.join(absolute_path, dir_entry)),
-                os.listdir(absolute_path)
+                lambda dir_entry: _format_path_info(
+                    os.path.join(absolute_path, dir_entry)
+                ),
+                os.listdir(absolute_path),
             )
         )
     except Exception as e:
-        return f'Error: {str(e)}'
-        
-def _format_path_info(file_path : str) -> str:
+        return f"Error: {str(e)}"
+
+
+def _format_path_info(file_path: str) -> str:
     return dedent(f"""\
                 - {os.path.basename(file_path)}: 
                 file_size={os.path.getsize(file_path)} bytes,

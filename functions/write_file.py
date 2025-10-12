@@ -2,26 +2,29 @@ import os
 from textwrap import dedent
 from google.genai.types import FunctionDeclaration, Schema, Type
 
-def write_file(working_directory : str, file_path, content : str) -> str:
+
+def write_file(working_directory: str, file_path, content: str) -> str:
     destination_file_path = os.path.join(working_directory, file_path)
 
     working_directory_absolute_path = os.path.abspath(working_directory)
     destination_file_absolute_path = os.path.abspath(destination_file_path)
     if (
-        not os.path.commonpath([working_directory_absolute_path, destination_file_absolute_path]) ==
-          working_directory_absolute_path
+        not os.path.commonpath(
+            [working_directory_absolute_path, destination_file_absolute_path]
+        )
+        == working_directory_absolute_path
     ):
         return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'
-    
+
     try:
         os.makedirs(os.path.dirname(destination_file_absolute_path), exist_ok=True)
-        with open(destination_file_absolute_path, 'w') as f:
+        with open(destination_file_absolute_path, "w") as f:
             f.write(content)
             return f'Successfully wrote to "{file_path}" ({len(content)} characters written)'
     except Exception as e:
-        return f'Error: {str(e)}'
-    
-    
+        return f"Error: {str(e)}"
+
+
 schema_write_file = FunctionDeclaration(
     name="write_file",
     description=dedent("""\
@@ -32,11 +35,10 @@ schema_write_file = FunctionDeclaration(
         properties={
             "file_path": Schema(
                 type=Type.STRING,
-                description="The path to the file to write, relative to the working directory."
+                description="The path to the file to write, relative to the working directory.",
             ),
             "content": Schema(
-                type=Type.STRING,
-                description="The content to write to the file."
+                type=Type.STRING, description="The content to write to the file."
             ),
         },
     ),
